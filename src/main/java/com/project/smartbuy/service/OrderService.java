@@ -76,6 +76,34 @@ public class OrderService {
         return order;
 
     }
+    //Pay Order
+    public void payOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow();
+        if (!order.getStatus().equals("pending")) {
+            throw new IllegalStateException("Only pending orders can be paid.");
+        }
+        order.setStatus("paid");
+        orderRepository.save(order);
+    }
+    //Merchant Shipping（Ship Order）——status: shipped
+    public void shipOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow();
+        if (!order.getStatus().equals("paid")) {
+            throw new IllegalStateException("Only paid orders can be shipped.");
+        }
+        order.setStatus("shipped");
+        orderRepository.save(order);
+    }
+    //User confirms receipt of product（Complete Order）——Status: completed
+    public void completeOrder(Long orderId) {
+        Order order = orderRepository.findById(orderId).orElseThrow();
+        if (!order.getStatus().equals("shipped")) {
+            throw new IllegalStateException("Only shipped orders can be completed.");
+        }
+        order.setStatus("completed");
+        orderRepository.save(order);
+    }
+
     // View user's orders
     public List<Order> getOrdersByUser(Long userId) {
         User user = userRepository.findById(userId).orElseThrow();
