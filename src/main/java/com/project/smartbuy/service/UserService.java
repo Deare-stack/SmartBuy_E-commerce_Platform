@@ -2,12 +2,14 @@ package com.project.smartbuy.service;
 
 import com.project.smartbuy.model.User;
 import com.project.smartbuy.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
 public class UserService {
-    private final UserRepository userRepository;
+    @Autowired
+    private UserRepository userRepository;
     private final BCryptPasswordEncoder passwordEncoder = new BCryptPasswordEncoder();
 
     public UserService(UserRepository userRepository) {
@@ -15,10 +17,16 @@ public class UserService {
     }
 
     //User register
-    public User register(User user) {
+    public User register(String username, String email, String rawPassword) {
+        //Check if the username or email address already exists
+        if (userRepository.findByUsername(username) != null) throw new RuntimeException("Username already exists！");
+        if (userRepository.findByEmail(email) != null) throw new RuntimeException("Email already exists！");
         //password encryption
-        String encodeedPassword= passwordEncoder.encode(user.getPasswordHash());
-        user.setPasswordHash(encodeedPassword);
+        String encoded= passwordEncoder.encode(rawPassword);
+        User user = new User();
+        user.setUsername(username);
+        user.setEmail(email);
+        user.setPasswordHash(encoded);
         user.setRole("user");
         user.setStatus("active");
         return userRepository.save(user);
